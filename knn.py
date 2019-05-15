@@ -20,7 +20,7 @@ del df['checkout']
 
 #------Dividir conjunto de datos para train y test
 
-train, test = train_test_split(df[['hotel_id','children', 'sale']], test_size=0.4)
+train, test = train_test_split(df[['hotel_id','days','children', 'sale']], test_size=0.1)
 train.reset_index(inplace = True)
 test.reset_index(inplace = True)
 
@@ -55,42 +55,11 @@ for i, weights in enumerate(['uniform', 'distance']):
 #----------------Construccion y ejecucion del modelo
 
 # constructor
-n_neighbors = 29
+n_neighbors = 30
 weights = 'uniform'
 knn = neighbors.KNeighborsClassifier(n_neighbors= n_neighbors, weights=weights) 
 # fit and predict
-knn.fit(X = train[['hotel_id','children']], y = train['sale'])
-y_pred = knn.predict(X = test[['hotel_id','children']])
+knn.fit(X = train[['hotel_id','days','children']], y = train['sale'])
+y_pred = knn.predict(X = test[['hotel_id','days','children']])
 acc = accuracy_score(test['sale'], y_pred)
 print ('Acc', acc)
-
-from matplotlib.colors import ListedColormap
-cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
-cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
-h = .05  # step size in the mesh
-
-
-X = train[['hotel_id','children']].as_matrix()
-y = train['sale'].as_matrix()
-
-
-# Plot the decision boundary. For that, we will assign a color to each
-# point in the mesh [x_min, x_max]x[y_min, y_max].
-x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-xx, yy = np.meshgrid(np.arange(x_min, x_max, h),np.arange(y_min, y_max, h))
-Z = knn.predict(np.c_[xx.ravel(), yy.ravel()])
-
-# Put the result into a color plot
-Z = Z.reshape(xx.shape)
-plt.figure()
-plt.pcolormesh(xx, yy, Z, cmap=cmap_light)
-
-
-# Plot also the training points
-plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap_bold,edgecolor='k', s=20)
-plt.xlim(xx.min(), xx.max())
-plt.ylim(yy.min(), yy.max())
-plt.title("Classification (k = %i, weights = '%s')"% (n_neighbors, weights))
-
-plt.show()
